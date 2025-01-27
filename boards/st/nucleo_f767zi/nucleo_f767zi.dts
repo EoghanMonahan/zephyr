@@ -45,6 +45,11 @@
 			gpios = <&gpiob 14 GPIO_ACTIVE_HIGH>;
 			label = "User LD3";
 		};
+
+		ad74416h_reset: ad74416h_reset {
+			gpios = <&gpiof 14 GPIO_ACTIVE_HIGH>;
+			label = "ad74416h_reset";
+		};
 	};
 
 	gpio_keys {
@@ -142,7 +147,7 @@ zephyr_udc0: &usbotg_fs {
 };
 
 &spi1 {
-	pinctrl-0 = <&spi1_sck_pa5 &spi1_miso_pa6 &spi1_mosi_pa7>;
+	pinctrl-0 = <&spi1_sck_pa5 &spi1_miso_pa6 &spi1_mosi_pb5>;
 	pinctrl-names = "default";
 	cs-gpios = <&gpiod 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 	/*
@@ -150,6 +155,13 @@ zephyr_udc0: &usbotg_fs {
 	 *          ETH_STM32_HAL.
 	 */
 	status = "okay";
+
+	ad74416h: ad74416h@0 {
+		compatible = "vnd,spi-device";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+		label = "ad74416h";
+	};
 };
 
 &iwdg {

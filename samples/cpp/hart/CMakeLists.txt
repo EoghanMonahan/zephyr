@@ -7,6 +7,10 @@ project(hart_cpp)
 
 target_sources(app PRIVATE src/main.cpp)
 
+target_sources(app PRIVATE src/no_os.cpp)
+target_sources(app PRIVATE src/ad74416h.cpp)
+target_include_directories(app PRIVATE src)
+
 # FILE(GLOB lib_hip_srcs ${LIB_HIP_PATH}/hipflowapp/Hip_Native/hipserver/hipserver/AppConnect/*.cpp
 #                         ${LIB_HIP_PATH}/hipflowapp/Hip_Native/hipserver/hipserver/Realtime/*.cpp
 #                         ${LIB_HIP_PATH}/hipflowapp/Hip_Native/hipserver/hipserver/Realtime/*.c

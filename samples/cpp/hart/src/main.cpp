@@ -177,7 +177,7 @@ static errVal_t create_hs_threads(void)
 	errval = start_a_thread(&socketThrID, socketThrFunc, socketThrName);
 
 	/* Thread for Server to receive msg from APP */
-	errval = start_a_thread(&popRxThrID, popRxThrFunc, popRxThrName);
+	//errval = start_a_thread(&popRxThrID, popRxThrFunc, popRxThrName);
 
 	return (errval);
 }
@@ -216,6 +216,7 @@ struct ad74416h_desc *ad74416h;
 int main(void)
 {
 	int ret;
+	uint16_t reg_read;
 	errVal_t errval = NO_ERROR;
 	char *app_name = "ADI HART-IP Zephyr Server";
 	struct ad74416h_init_param ad74416h_ip = {
@@ -230,64 +231,50 @@ int main(void)
 		//printf("%s:%d: success\n", __func__, __LINE__);
 	}
 
-	ret = ad74416h_set_channel_function(ad74416h, 0, AD74416H_CURRENT_OUT);
+	ret = ad74416h_gpio_set(ad74416h, AD74416H_CH_B, NO_OS_GPIO_HIGH);
+	if (ret)
+		printf("ad74416h_gpio_set() failed\n");
+
+	ret = ad74416h_gpio_set(ad74416h, AD74416H_CH_D, NO_OS_GPIO_HIGH);
+	if (ret)
+		printf("ad74416h_gpio_set() failed\n");
+
+
+	/* Configure the channel in the appropriate function (current input loop powered with HART) */
+	ret = ad74416h_reg_update(ad74416h, AD74416H_CH_FUNC_SETUP(0),
+				  AD74416H_CH_FUNC_SETUP_MSK,
+				  AD74416H_CURRENT_IN_LOOP_HART);
 	if (ret)
 		printf("%s:%d: error\n", __func__, __LINE__);
 
-	ret = ad74416h_set_channel_function(ad74416h, 1, AD74416H_CURRENT_OUT);
+	/* Wait 200 μs before proceeding with another step */
+	no_os_udelay(200);
+
+	/* Wait until HART Compliant Slew is Settled */
+	while (1) {
+		ret = ad74416h_reg_read(ad74416h,
+					AD74416H_OUTPUT_CONFIG(0), &reg_read);
+		if (ret)
+			printf("%s:%d: error\n", __func__, __LINE__);
+		reg_read = no_os_field_get(AD74416H_HART_COMPL_SETTLED_MSK, reg_read);
+		if (reg_read == 1)
+			break;
+	}
+
+	/* Enable the HART slew option SLEW_EN to binary 10 (SLEW_HART_COMPL) */
+	ret = ad74416h_reg_update(ad74416h, AD74416H_OUTPUT_CONFIG(0),
+				  AD74416H_SLEW_EN_MSK, 2);
 	if (ret)
 		printf("%s:%d: error\n", __func__, __LINE__);
 
-	ret = ad74416h_set_channel_function(ad74416h, 2, AD74416H_CURRENT_OUT);
+	/* Power up the HART modem */
+	ret = ad74416h_reg_update(ad74416h, AD74416H_HART_CONFIG(0), AD74416H_MODEM_PWRUP_MSK, 1);
 	if (ret)
 		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_channel_dac_code(ad74416h, 0, 0x00);
-	if (ret)
-		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_channel_dac_code(ad74416h, 1, 0x00);
-	if (ret)
-		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_channel_dac_code(ad74416h, 2, 0x00);
-	if (ret)
-		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_channel_function(ad74416h, 3, AD74416H_RESISTANCE);
-	if (ret)
-		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_adc_channel_enable(ad74416h, 3, 1);
-	if (ret)
-		printf("%s:%d: error\n", __func__, __LINE__);
-
-	ret = ad74416h_set_adc_conv_seq(ad74416h, AD74416H_START_CONT);
-	if (ret)
-		return ret;
 
 	ret = create_hs_semaphores(1);
 
-
-	ret = create_mqueues(0);
-
 	ret = create_hs_threads();
-
-	NativeApp app(app_name, "1.0");
-	pGlobalApp = &app;
-
-	AppConnector<AppPdu> globalAppConnector; // ctor sets config, incl address
-	pAppConnector = &globalAppConnector;
-
-	errval = app.commandline(1, &app_name);
-
-	errval = app.configure();
-
-	errval = app.initialize();
-
-	//printf("hello from %s!\n", app.GetName());
-	pAppConnector->run(&app); // ends on abortApp
-
 
 	while(1){
 		k_sleep(K_MSEC(10));

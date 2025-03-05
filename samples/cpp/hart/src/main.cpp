@@ -11,10 +11,8 @@
 #include "signal.h"
 
 #include "appconnector.h"
-#include "nativeapp.h"
 #include "tppdu.h"
 #include "datatypes.h"
-#include "shared.h"
 
 #include "hssems.h"
 #include "hsudp.h"
@@ -34,11 +32,6 @@ pthread_t popTxThrID;  // used by APP to read msg from Server
 pthread_t socketThrID; // used by Server to read socket
 pthread_t appThrID = 0; // used by Server to launch the APP program
 
-// template <AppPdu>
-// uint16_t AppConnector<AppPdu>::getStats(uint16_t &stxs, uint16_t &acks, uint16_t &baks)
-// {
-// 	return 0;
-// }
 
 int signal(int signum, void (*_sig_func_ptr)(int))
 {
@@ -46,63 +39,6 @@ int signal(int signum, void (*_sig_func_ptr)(int))
 }
 
 int raise(int sig)
-{
-	return 0;
-}
-
-AppConnector<AppPdu> *pAppConnector = NULL;
-//App *pGlobalApp = NULL;
-NativeApp *pGlobalApp = NULL;
-
-errVal_t NativeApp::getLowMAC(uint8_t *pArr, bool getFullAddress)
-{
-	return 0;
-}
-
-
-
-errVal_t serializationFile::putData(void)
-{
-	return 0;
-}
-
-errVal_t serializationFile::getData(void)
-{
-	return 0;
-}
-
-void serializationFile::Close_File(void)
-{
-	return 0;
-}
-
-bool serializationFile::CheckFile(char* filespec)
-{
-	return true;
-}
-
-
-int serializationFile::Open_File(char* filespec, int filespecLen)
-{
-	return 0;
-}
-
-serializationFile::serializationFile()
-{
-	pFD = NULL;
-}
-
-serializationFile::~serializationFile()
-{
-	if ( pFD )
-	{
-		// fclose(pFD);
-		pFD = NULL;
-	}
-}
-
-
-errVal_t NativeApp::initHostNameDns()
 {
 	return 0;
 }
@@ -187,27 +123,6 @@ void shutdown_server(void)
 	// Send the signal for Ctrl+C to the thread.
 	// #6004
 	// sighandler_hs_endall(SIGINT);
-}
-
-void *run_io(void *data)
-{
-	sharedArgs_s *pshared = (sharedArgs_s *)data;
-
-	// memset(pshared->padc, 0xEF, 4 * sizeof(pshared->padc));
-
-	for (int idx = 0;; idx++){
-		sem_wait(pshared->pSemaPhore);
-		for (int i = 0; i < 3; i++){
-			pshared->padc[i] = 0x7845 + (idx << 8);
-		}
-		(*pshared->upCnt)++;
-		sem_post(pshared->pSemaPhore);
-
-		// printf("run_io running\n");
-		k_sleep(K_MSEC(10));
-	}
-
-	return NULL;
 }
 
 struct ad74416h_desc *ad74416h;

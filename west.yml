@@ -35,19 +35,13 @@ manifest:
     - name: hal_adi
       revision: 0d4a117bd188a10fd86434a52b97598faf1c4e49
       path: modules/hal/adi
-      url: https://github.com/CiprianRegus/hal_adi
-      groups:
-        - hal
-    - name: hipflowapp
-      revision: ca8696ae7de25b82b86fc2742649aefcf19c0d3c
-      path: modules/hipflowapp
-      url: https://github.com/CiprianRegus/hipflowapp.git
+      url: https://github.com/EoghanMonahan/hal_adi
       groups:
         - hal
     - name: hipserver
-      revision: 1d563c21d24e4e2c89dc8c63d810e38d0955e6d4
-      path: modules/hipflowapp/hipflowapp/Hip_Native/hipserver
-      url: https://github.com/CiprianRegus/hipserver.git
+      revision: 55bd6b5021ed3513f936f793e2ff1417cb6717c8
+      path: modules/hipserver
+      url: https://github.com/EoghanMonahan/hipserver.git
       groups:
         - hal
     - name: hal_stm32

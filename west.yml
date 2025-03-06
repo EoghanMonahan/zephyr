@@ -39,7 +39,7 @@ manifest:
       groups:
         - hal
     - name: hipserver
-      revision: 55bd6b5021ed3513f936f793e2ff1417cb6717c8
+      revision: ad74416h
       path: modules/hipserver
       url: https://github.com/EoghanMonahan/hipserver.git
       groups:
